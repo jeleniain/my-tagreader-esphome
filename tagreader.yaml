@@ -58,14 +58,14 @@ switch:
   id: buzzer_enabled
   icon: mdi:volume-high
   optimistic: true
-  restore_state: true
+  restore_mode: RESTORE_DEFAULT_ON
   entity_category: config
 - platform: template
   name: "${friendly_name} LED enabled"
   id: led_enabled
   icon: mdi:alarm-light-outline
   optimistic: true
-  restore_state: true
+  restore_mode: RESTORE_DEFAULT_ON
   entity_category: config
   
 # Define buttons for writing tags via HA 
@@ -238,17 +238,17 @@ pn532_i2c:
   id: pn532_board
   on_tag:
     then:
-#    - if:
-#        condition:
-#          switch.is_on: led_enabled
-#        then:
-#        - light.turn_on:
-#            id: activity_led
-#            brightness: 100%
-#            red: 0%
-#            green: 100%
-#            blue: 0%
-#            flash_length: 500ms
+    - if:
+        condition:
+          switch.is_on: led_enabled
+        then:
+        - light.turn_on:
+            id: activity_led
+            brightness: 100%
+            red: 0%
+            green: 100%
+            blue: 0%
+            flash_length: 500ms
     
     - delay: 0.15s #to fix slow component
         
@@ -332,7 +332,10 @@ pn532_i2c:
           switch.is_on: buzzer_enabled
         then:
         - rtttl.play: "success:d=24,o=5,b=100:c,g,b"
-    
+  on_tag_removed:
+    then:
+    - homeassistant.event:
+        event: esphome.tag_removed
 # Define the buzzer output
 output:
 - platform: esp8266_pwm
